@@ -7,7 +7,7 @@
 		<!-- 2A00: org.bluetooth.characteristic.gap.device_name -->
       <characteristic uuid="2a00">
         <properties read="true" const="true" />
-        <value>Gizmo Demo Node</value>
+        <value>DPP Sensor Node</value>
       </characteristic>
 		<!-- 2A01: org.bluetooth.characteristic.gap.appearance -->
       <characteristic uuid="2a01">
@@ -35,13 +35,33 @@
         </characteristic>
     </service>
     
-    <service uuid="00431c4a-a7a4-428b-a96d-d92d43c8c7cf" advertise="true">
-        <description>Gizmo Load service</description>		
-		<characteristic uuid="f1b41cde-dbf5-4acf-8679-ecb8b4dca6fe" id="xgatt_pdata">
-			<description>Weight Data</description>
+    <service uuid="f1b41cde-dbf5-4acf-8679-ecb8b4dcaa00" advertise="true">
+        <description>Sensor Data service</description>	
+        
+        <characteristic uuid="2a6e" id="xgatt_pdata">
+            <description>Temperature</description>
             <properties read="true" notify="true"/>
-            <value length="1"/>
+            <value length="4"/>
+        </characteristic>   
+
+		<characteristic uuid="f1b41cde-dbf5-4acf-8679-ecb8b4dcaa01" >
+			<description>CO2</description>
+            <properties read="true" notify="true"/>
+            <value> Carbon Di oxide</value>
+        </characteristic>
+
+        <characteristic uuid="f1b41cde-dbf5-4acf-8679-ecb8b4dcaa02" >
+            <description>CO</description>
+            <properties read="true" notify="true"/>
+            <value> Carbon mon oxide</value>
         </characteristic>		
+
+        <characteristic uuid="f1b41cde-dbf5-4acf-8679-ecb8b4dcaa03" >
+            <description>Accelerometer</description>
+            <properties read="true" notify="true"/>
+            <value>xlero</value>
+        </characteristic>
+
     </service>
 	
 	<!-- battery service -->
