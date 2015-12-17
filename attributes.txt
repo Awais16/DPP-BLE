@@ -1,3 +1,6 @@
 xgatt_dis_2a25 12
 xgatt_pdata 15
-xgatt_bts_2a19 28
+xgatt_co2 19
+xgatt_co 23
+xgatt_xlero 27
+xgatt_bts_2a19 32
