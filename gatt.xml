@@ -3,7 +3,7 @@
 	<!-- 1800: org.bluetooth.service.generic_access -->
     <service uuid="1800">
       <description>Generic Access Profile</description>
-	
+      	
 		<!-- 2A00: org.bluetooth.characteristic.gap.device_name -->
       <characteristic uuid="2a00">
         <properties read="true" const="true" />
@@ -38,7 +38,7 @@
     <service uuid="50872a7f-7ea8-4d83-8bde-c6ee61bd4ef4" advertise="true">
         <description>Sensor Data service</description>	
         
-        <characteristic uuid="2a6e" id="xgatt_pdata">
+        <characteristic uuid="2a6e" id="xgatt_temp">
             <description>Temperature</description>
             <properties read="true" notify="true"/>
             <value length="4"/>
@@ -47,7 +47,7 @@
 		<characteristic uuid="e524eeca-e59b-4406-8fad-9f6d9e3c3cac" id="xgatt_co2">
 			<description>CO2</description>
             <properties read="true" notify="true"/>
-            <value length="4" type="utf-8">1344</value>
+            <value length="4" type="user">1344</value>
         </characteristic>
 
         <characteristic uuid="c17ff774-029a-4792-83e1-8ac25d1b7995" id="xgatt_co">

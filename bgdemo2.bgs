@@ -7,25 +7,37 @@ dim batconn_handle
 #store battery measurement result
 dim batresult
 
-dim weight
+dim temp
 dim co2
 dim co
+
+dim in(1)          # endpoint data in buffer
+dim in_len          # endpoint data in buffer size
+dim resRx          # endpoint RX error code
+
 
 # Boot Event listener
 event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw )
 	
+	in_len=1
+	call system_endpoint_set_watermarks(system_endpoint_uart1, 1, 0)
+	# DEBUG OUTPUT: ready
+    #call system_endpoint_tx(system_endpoint_uart1, 9, "\r\nREADY\r\n")
+	
 	#Get local BT address
 	call system_address_get( )(addr(0:6))
-	weight=0
+	temp=0
 	co2=0
 	co=0
 	# Write BT address to DI service serial number string
 	call attributes_write(xgatt_dis_2a25,0,6,addr(0:6))
 	
 	
-	call hardware_io_port_config_direction(1, $20)
-	call hardware_io_port_write(1, $20, 0)
+	#call hardware_io_port_config_direction(0, 1) #call hardware_io_port_config_direction(port, direction)(result)
+	#call hardware_io_port_write(0, 1, 0) #call hardware_io_port_write(port, mask, data)(result)
 	
+	#call hardware_io_port_config_direction(0, 1) #call hardware_io_port_config_direction(port, direction)(result)
+	#call hardware_io_port_write(0, $1, 1) #call hardware_io_port_write(port, mask, data)(result)
 	
 	#set to advertising mode
 	call gap_set_mode(gap_general_discoverable,gap_undirected_connectable)
@@ -39,12 +51,21 @@ event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw )
 end
 
 event hardware_soft_timer(handle)    
-	weight=weight+1	
+	temp=temp+1	
 	co2=co2+2
 	co=co+1
-	call attributes_write(xgatt_pdata,0,4,weight)
-	call attributes_write(xgatt_co2,0,4,co2)
-	call attributes_write(xgatt_co,0,4,co)
+	
+	
+	
+	call attributes_write(xgatt_temp,0,4,temp)
+	#call attributes_write(xgatt_co2,0,4,co2)
+	#call attributes_write(xgatt_co,0,4,co)
+	
+	#call system_endpoint_rx(system_endpoint_uart1,4,temp)
+	#call system_endpoint_rx(system_endpoint_uart1, in_len)(resRx, in_len, in(0:in_len))
+	
+	#call system_endpoint_rx(system_endpoint_uart1, 4)(txRes,4,temp(0:4))
+	#call attributes_write(xgatt_co2,0,4,in_len)
 	
 end
 
@@ -53,7 +74,7 @@ event connection_disconnected(handle,result)
 	#connection disconnected, continue advertising
 	batconn_handle=$ff
     call gap_set_mode(gap_general_discoverable,gap_undirected_connectable)
-	call hardware_io_port_write(1, $20, 0)
+	#call hardware_io_port_write(1, $20, 0) read about bit masking for address;
 	
 	
 end
@@ -61,7 +82,7 @@ end
 # Connection event listener
 event connection_status(connection, flags, address, address_type, conn_interval, timeout, latency,bonding)
 # Device is connected.
-	call hardware_io_port_write(1, $20, $20)	
+	#call hardware_io_port_write(1, $20, $20)	
 end
 
 
@@ -98,6 +119,35 @@ event hardware_adc_result(input,value)
 		call attributes_user_read_response(batconn_handle,0,1,tmp(0:1))
 		batconn_handle=$ff
 	end if
+end
+
+event system_endpoint_watermark_rx(endpoint, size)
+	#call hardware_io_port_write(0, 1, 1) #call hardware_io_port_write(port, mask, data)(result)
+	if endpoint = system_endpoint_uart1 then
+		call system_endpoint_set_watermarks(system_endpoint_uart1, 0, $ff)
+        
+        # read available data from UART1
+        if in_len > 20 then
+        #    in_len = 20 # don't read more than we have space available for
+            
+            # (internal endpoint buffer is 64 bytes, but BLE packets cannot hold
+            # more than 20 data payload bytes, so typically limiting this to 20
+            # bytes at a time is appropriate for BLE applications--even though
+            # this particular example doesn't use BLE at all but only echos)
+        end if
+        call system_endpoint_rx(system_endpoint_uart1, in_len)(resRx, in_len, in(0:in_len))
+        
+		#call attributes_write(xgatt_co2,0,4,in_len)
+		
+        # write data back out the UART1
+        #call system_endpoint_tx(system_endpoint_uart1, in_len, in(0:in_len))
+		
+		call attributes_write(xgatt_co2,0,in_len,in(0:in_len))
+        # set RX watermark on UART1
+        call system_endpoint_set_watermarks(system_endpoint_uart1, in_len, $ff)
+	
+	end if
+	#call hardware_io_port_write(0, 1, 0) #call hardware_io_port_write(port, mask, data)(result)
 end
 
 

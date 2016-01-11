@@ -1,5 +1,5 @@
 xgatt_dis_2a25 12
-xgatt_pdata 15
+xgatt_temp 15
 xgatt_co2 19
 xgatt_co 23
 xgatt_xlero 27
