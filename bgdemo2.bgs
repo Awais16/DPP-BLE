@@ -11,16 +11,16 @@ dim temp
 dim co2
 dim co
 
-dim in(1)          # endpoint data in buffer
+dim in(15)          # endpoint data in buffer
 dim in_len          # endpoint data in buffer size
 dim resRx          # endpoint RX error code
-
+dim l2
 
 # Boot Event listener
 event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw )
-	
-	in_len=1
-	call system_endpoint_set_watermarks(system_endpoint_uart1, 1, 0)
+	l2=1
+	in_len=15
+	call system_endpoint_set_watermarks(system_endpoint_uart1, in_len, 0) #recieve 1 byte
 	# DEBUG OUTPUT: ready
     #call system_endpoint_tx(system_endpoint_uart1, 9, "\r\nREADY\r\n")
 	
@@ -54,7 +54,6 @@ event hardware_soft_timer(handle)
 	temp=temp+1	
 	co2=co2+2
 	co=co+1
-	
 	
 	
 	call attributes_write(xgatt_temp,0,4,temp)
@@ -121,6 +120,8 @@ event hardware_adc_result(input,value)
 	end if
 end
 
+dim comand(1)
+
 event system_endpoint_watermark_rx(endpoint, size)
 	#call hardware_io_port_write(0, 1, 1) #call hardware_io_port_write(port, mask, data)(result)
 	if endpoint = system_endpoint_uart1 then
@@ -135,12 +136,25 @@ event system_endpoint_watermark_rx(endpoint, size)
             # bytes at a time is appropriate for BLE applications--even though
             # this particular example doesn't use BLE at all but only echos)
         end if
-        call system_endpoint_rx(system_endpoint_uart1, in_len)(resRx, in_len, in(0:in_len))
+        
+		#########testing
+			
+			#call system_endpoint_rx(system_endpoint_uart1, 1)(resRx, l2, comand(0:1))
+			
+			#call attributes_write(xgatt_co2,0,1,comand(0:1))
+			#call system_endpoint_set_watermarks(system_endpoint_uart1, 1, $ff)
+		
+		#########testing###
+		
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(resRx, in_len, in(0:in_len))
         
 		#call attributes_write(xgatt_co2,0,4,in_len)
 		
         # write data back out the UART1
         #call system_endpoint_tx(system_endpoint_uart1, in_len, in(0:in_len))
+		
+		#4bytes read.
+		#TODO: Proabably have to parse bytes
 		
 		call attributes_write(xgatt_co2,0,in_len,in(0:in_len))
         # set RX watermark on UART1
